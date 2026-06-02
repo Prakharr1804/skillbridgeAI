@@ -1,0 +1,199 @@
+// ──────────────────────────────────────────────
+// Auth Forms (Login / Register) — SCSS
+// Uses global CSS variables from style.scss
+// ──────────────────────────────────────────────
+
+.auth-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+
+  &--loading {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+// ── Loading ─────────────────────────────────────
+.auth-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: auth-spin 0.8s linear infinite;
+}
+
+.auth-loading-text {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+@keyframes auth-spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Card ────────────────────────────────────────
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: var(--shadow-card);
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  &__brand-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__footer {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 0;
+  }
+
+  &__link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.15s ease;
+    &:hover { opacity: 0.8; }
+  }
+}
+
+// ── Error banner ────────────────────────────────
+.auth-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  background-color: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: var(--accent);
+  line-height: 1.4;
+
+  svg { flex-shrink: 0; }
+}
+
+// ── Form ────────────────────────────────────────
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ── Field ───────────────────────────────────────
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  &__label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 12px 14px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-body);
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+
+    &::placeholder { color: var(--text-placeholder); }
+
+    &:focus {
+      border-color: var(--accent-border);
+      box-shadow: 0 0 0 3px var(--accent-subtle);
+    }
+  }
+}
+
+// ── Submit button ────────────────────────────────
+.auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border: none;
+  border-radius: 50px;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 20px var(--accent-glow);
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 28px rgba(232, 51, 74, 0.4);
+  }
+
+  &:active:not(:disabled) { transform: translateY(0); opacity: 1; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  svg { flex-shrink: 0; }
+}

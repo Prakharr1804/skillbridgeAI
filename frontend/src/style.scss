@@ -1,0 +1,98 @@
+@use "./style/button";
+
+// ── CSS Custom Properties — Theme Variables ──────────────────────────────────
+// Default = dark mode. Light mode applied via [data-theme="light"] on <html>.
+
+:root,
+[data-theme="dark"] {
+  --bg-base:        #0f0f0f;
+  --bg-surface:     #1a1a1a;
+  --bg-raised:      #222222;
+  --bg-input:       #141414;
+  --border:         #2a2a2a;
+  --border-subtle:  #232323;
+  --border-dashed:  #3a3a3a;
+  --text-primary:   #ffffff;
+  --text-secondary: #aaaaaa;
+  --text-body:      #cccccc;
+  --text-muted:     #555555;
+  --text-placeholder: #3a3a3a;
+  --accent:         #e8334a;
+  --accent-dark:    #c8102e;
+  --accent-glow:    rgba(232, 51, 74, 0.25);
+  --accent-subtle:  rgba(232, 51, 74, 0.08);
+  --accent-border:  rgba(232, 51, 74, 0.4);
+  --score-high:     #22c55e;
+  --score-mid:      #f59e0b;
+  --score-low:      #e8334a;
+  --scrollbar-thumb: #2e2e2e;
+  --shadow-card:    0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="light"] {
+  --bg-base:        #f4f4f5;
+  --bg-surface:     #ffffff;
+  --bg-raised:      #f0f0f0;
+  --bg-input:       #fafafa;
+  --border:         #e4e4e7;
+  --border-subtle:  #ececec;
+  --border-dashed:  #d1d1d6;
+  --text-primary:   #111111;
+  --text-secondary: #444444;
+  --text-body:      #333333;
+  --text-muted:     #999999;
+  --text-placeholder: #bbbbbb;
+  --accent:         #e8334a;
+  --accent-dark:    #c8102e;
+  --accent-glow:    rgba(232, 51, 74, 0.15);
+  --accent-subtle:  rgba(232, 51, 74, 0.06);
+  --accent-border:  rgba(232, 51, 74, 0.35);
+  --score-high:     #16a34a;
+  --score-mid:      #d97706;
+  --score-low:      #e8334a;
+  --scrollbar-thumb: #c4c4c8;
+  --shadow-card:    0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+// ── Base Reset ───────────────────────────────────────────────────────────────
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  // Smooth theme transition on all elements
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+html, body, #root {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+               Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+// ── Global smooth transitions for themed elements ────────────────────────────
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+// ── Global custom scrollbar ──────────────────────────────────────────────────
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+
+  &::-webkit-scrollbar { width: 4px; height: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 99px;
+  }
+}

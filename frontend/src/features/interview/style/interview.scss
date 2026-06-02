@@ -1,0 +1,463 @@
+// ──────────────────────────────────────────────
+// Interview Page — SCSS  (uses global CSS variables)
+// ──────────────────────────────────────────────
+
+// ── Page Shell ───────────────────────────────────────────────────────────────
+.interview {
+  display: grid;
+  grid-template-columns: 220px 1fr 260px;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: inherit;
+
+  &--loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    height: 100vh;
+    overflow: unset;
+    grid-template-columns: unset;
+  }
+}
+
+// ── Loading Spinner ───────────────────────────────────────────────────────────
+.iv-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.iv-loading-text {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ── Shared Sidebar ────────────────────────────────────────────────────────────
+.iv-sidebar {
+  padding: 32px 20px;
+  border-color: var(--border);
+  border-style: solid;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+
+  &::-webkit-scrollbar              { width: 3px; }
+  &::-webkit-scrollbar-track        { background: transparent; }
+  &::-webkit-scrollbar-thumb        {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 99px;
+  }
+  &::-webkit-scrollbar-thumb:hover  { background-color: var(--accent); }
+
+  &--left {
+    border-right-width: 1px;
+    border-left-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    background-color: var(--bg-base);
+  }
+
+  &--right {
+    border-left-width: 1px;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    background-color: var(--bg-base);
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  &__brand-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  &__block {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  &__block-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+}
+
+// ── Left Nav ─────────────────────────────────────────────────────────────────
+.iv-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: left;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    font-family: inherit;
+
+    &:hover {
+      background-color: var(--bg-raised);
+      color: var(--text-primary);
+    }
+
+    &--active {
+      background-color: var(--accent-subtle);
+      color: var(--text-primary);
+
+      .iv-nav__indicator {
+        background-color: var(--accent);
+      }
+    }
+  }
+
+  &__indicator {
+    width: 3px;
+    height: 14px;
+    border-radius: 2px;
+    background-color: transparent;
+    flex-shrink: 0;
+    transition: background-color 0.15s ease;
+  }
+}
+
+// ── Main Content Area ─────────────────────────────────────────────────────────
+.iv-main {
+  padding: 36px 40px;
+  overflow-y: auto;
+  height: 100vh;
+  background-color: var(--bg-base);
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+
+  &::-webkit-scrollbar              { width: 4px; }
+  &::-webkit-scrollbar-track        { background: transparent; }
+  &::-webkit-scrollbar-thumb        {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 99px;
+    transition: background-color 0.2s ease;
+  }
+  &::-webkit-scrollbar-thumb:hover  { background-color: var(--accent); }
+}
+
+// ── Content Section Wrapper ───────────────────────────────────────────────────
+.iv-content-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &__title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+
+  &__meta {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+// ── Question Card ─────────────────────────────────────────────────────────────
+.iv-question-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background-color: var(--bg-surface);
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+
+  &--open {
+    border-color: var(--accent-border);
+  }
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    width: 100%;
+    padding: 16px 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--bg-raised);
+    }
+  }
+
+  &__index {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__q {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+
+  &__chevron {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 1px;
+  }
+
+  &__body {
+    padding: 14px 18px 18px 46px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  &__block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__block-label {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    margin: 0;
+  }
+}
+
+// ── Roadmap Card ──────────────────────────────────────────────────────────────
+.iv-roadmap-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background-color: var(--bg-surface);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  &__day {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  &__focus {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  &__tasks {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__task {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+
+  &__bullet {
+    width: 5px;
+    height: 5px;
+    background-color: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+}
+
+// ── Match Score Ring ──────────────────────────────────────────────────────────
+.iv-score {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  svg { flex-shrink: 0; }
+
+  &__label {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+
+  &__value {
+    font-size: 1.6rem;
+    font-weight: 800;
+  }
+
+  &__unit {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+}
+
+// ── Skill Gaps ────────────────────────────────────────────────────────────────
+.iv-skill-gaps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.iv-skill-gap {
+  display: inline-block;
+  padding: 5px 11px;
+  border-radius: 20px;
+  border-width: 1px;
+  border-style: solid;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: default;
+  transition: opacity 0.15s ease;
+
+  &:hover { opacity: 0.8; }
+
+  &--high {
+    color: var(--score-low);
+    border-color: rgba(232, 51, 74, 0.4);
+    background-color: rgba(232, 51, 74, 0.08);
+  }
+
+  &--medium {
+    color: var(--score-mid);
+    border-color: rgba(245, 158, 11, 0.4);
+    background-color: rgba(245, 158, 11, 0.08);
+  }
+
+  &--low {
+    color: var(--score-high);
+    border-color: rgba(34, 197, 94, 0.4);
+    background-color: rgba(34, 197, 94, 0.08);
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 900px) {
+  .interview {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  .iv-sidebar {
+    position: static;
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .iv-sidebar--left {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 20px;
+
+    .iv-nav {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+  }
+
+  .iv-sidebar--right {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding: 20px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .iv-main {
+    padding: 24px 20px;
+    height: auto;
+    overflow-y: visible;
+  }
+}
