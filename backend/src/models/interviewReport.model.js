@@ -92,6 +92,9 @@ const preprationPlanSchema = new mongoose.Schema({
         type: String,
         required: [true, "Tasks are required"]
     }],
+    eventId: {
+        type: String
+    }
 })
 
 const interviewReportSchema = new mongoose.Schema({
