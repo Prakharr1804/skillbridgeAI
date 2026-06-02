@@ -233,7 +233,8 @@ const CalendarNotConfigured = ({ onClose }) => (
  * Public modal shell — safely handles missing GoogleOAuthProvider.
  */
 const CalendarSyncModal = ({ isOpen, onClose, report, interviewId, syncCalendar }) => {
-  const isConfigured = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const isConfigured = Boolean(clientId && clientId !== 'your_google_client_id_here');
 
   if (!isOpen) return null;
 

@@ -5,10 +5,11 @@ import App from './App.jsx'
 import './style.scss'
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const isConfigured = googleClientId && googleClientId !== 'your_google_client_id_here';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {googleClientId ? (
+    {isConfigured ? (
       <GoogleOAuthProvider clientId={googleClientId}>
         <App />
       </GoogleOAuthProvider>
