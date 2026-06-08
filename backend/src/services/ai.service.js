@@ -1,6 +1,6 @@
 const { GoogleGenAI, Type } = require("@google/genai");
 const { z } = require("zod");
-const puppeteer = require("puppeteer-core");
+const puppeteer = require("puppeteer");
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GOOGLE_GENAI_API_KEY
@@ -133,8 +133,7 @@ ${jobDescription}
 
 async function generatePdfFromHtml(html){
     const browser = await puppeteer.launch({
-        headless: true,
-        executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     })
     const page = await browser.newPage()
     await page.setContent(html)
