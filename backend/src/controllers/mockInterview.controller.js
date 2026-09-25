@@ -20,13 +20,6 @@ function findQuestionInReport(report, questionType, questionText) {
     return list.find(q => q.question === questionText) || null;
 }
 
-/**
- * Builds the public audio URL from the saved filename.
- */
-function buildAudioUrl(req, filename) {
-    return `${req.protocol}://${req.get('host')}/uploads/audio/${filename}`;
-}
-
 // ── Controllers ───────────────────────────────────────────────────────────────
 
 /**
@@ -191,11 +184,11 @@ async function submitAnswerController(req, res) {
     }
 
     const expectedAnswer = questionObj.answer;
-    const audioFilePath  = req.file.path;
+    const audioBuffer    = req.file.buffer;
     const audioMimeType  = req.file.mimetype;
 
-    // ── Step 1: Transcribe audio ──────────────────────────────────────────────
-    const { transcript, durationSeconds } = await transcribeAudio(audioFilePath, audioMimeType);
+    // ── Step 1: Transcribe audio (processed in-memory) ─────────────────────────
+    const { transcript, durationSeconds } = await transcribeAudio(audioBuffer, audioMimeType);
 
     // ── Step 2: Speech analysis (local, no AI) ────────────────────────────────
     const speechAnalysis = analyzeSpeech(transcript, durationSeconds);
@@ -203,8 +196,8 @@ async function submitAnswerController(req, res) {
     // ── Step 3: Gemini evaluation ─────────────────────────────────────────────
     const evaluation = await evaluateAnswer({ question, expectedAnswer, transcript, questionType });
 
-    // ── Step 4: Build audio URL ───────────────────────────────────────────────
-    const audioUrl = buildAudioUrl(req, req.file.filename);
+    // ── Step 4: Audio URL (in-memory processing, no permanent file stored) ────
+    const audioUrl = null;
 
     // ── Step 5: Persist InterviewResponse ────────────────────────────────────
     const interviewResponse = await InterviewResponse.create({

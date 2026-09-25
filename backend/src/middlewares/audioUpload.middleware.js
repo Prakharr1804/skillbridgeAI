@@ -1,21 +1,7 @@
 const multer = require('multer');
-const path   = require('path');
-const fs     = require('fs');
 
-// Ensure upload directory exists at module load time
-const uploadDir = path.join(__dirname, '../../uploads/audio');
-fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-    destination: (_req, _file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (_req, file, cb) => {
-        const ext      = path.extname(file.originalname) || '.webm';
-        const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-        cb(null, filename);
-    },
-});
+// Store audio in memory buffer for immediate AI transcription without persisting to disk
+const storage = multer.memoryStorage();
 
 const audioUpload = multer({
     storage,
@@ -32,3 +18,4 @@ const audioUpload = multer({
 });
 
 module.exports = audioUpload;
+
