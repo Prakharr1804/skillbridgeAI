@@ -1,6 +1,6 @@
 const { GoogleGenAI, Type } = require("@google/genai");
 const { z } = require("zod");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GOOGLE_GENAI_API_KEY
@@ -131,20 +131,24 @@ ${jobDescription}
     return report
 }
 
-async function generatePdfFromHtml(html){
-    const browser = await puppeteer.launch({
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    })
-    const page = await browser.newPage()
-    await page.setContent(html)
-    const pdfBuffer = await page.pdf({ format: 'A4', margin: {
-            top: "20mm",
-            bottom: "20mm",
-            left: "15mm",
-            right: "15mm"
-        }})
-    await browser.close()
-    return pdfBuffer
+async function generatePdfFromHtml(html) {
+  const browser = await puppeteer.connect({
+    browserWSEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_TOKEN}`,
+  });
+  
+  const page = await browser.newPage();
+  await page.setContent(html, { waitUntil: 'networkidle0' });
+  const pdfBuffer = await page.pdf({
+    format: 'A4',
+    margin: {
+      top: '20mm',
+      bottom: '20mm',
+      left: '15mm',
+      right: '15mm'
+    }
+  });
+  await browser.close();
+  return pdfBuffer;
 }
 
 async function generateResumePdf({resume, selfDescription, jobDescription}){

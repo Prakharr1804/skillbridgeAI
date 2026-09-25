@@ -9,11 +9,13 @@ const jwt = require('jsonwebtoken')
  * @access Public
  */
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Support cross-origin in prod if necessary
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  httpOnly: true,
+  secure: isProduction, // HTTPS required in production
+  sameSite: isProduction ? 'none' : 'lax', // 'none' allows cross-domain auth between Vercel and Render
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
 };
 
 async function registerUserController(req , res) {
