@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../auth.context";
-import { login, logout, register, getMe } from "../services/auth.api";
+import { login, logout, register, getMe, sendOtp, verifyOtp } from "../services/auth.api";
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -19,15 +19,15 @@ export const useAuth = () => {
     }
   };
 
-  const handleRegister = async ({ username, email, password }) => {
+  const handleRegister = async ({ username, email, password, otp }) => {
     try {
-      setLoading(true);
-      const data = await register({ username, email, password });
-
-      setUser(data.user);
+        setLoading(true);
+        const data = await register({ username, email, password, otp });
+        return data;
     } catch (error) {
+        throw error;
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -42,27 +42,42 @@ export const useAuth = () => {
     }
   };
 
+  const handleOtpLogin = async ({ email, otp }) => {
+    try {
+      setLoading(true);
+      const data = await verifyOtp({ email, otp });
+      setUser(data.user);
+      return data;
+    } catch (err) {
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const getAndSetUser = async () => {
       try {
-        const data = await getMe()
+        const data = await getMe();
         if (data?.user) {
-          setUser(data.user)
+          setUser(data.user);
         }
       } catch (err) {
-        console.log("Auth check failed:", err)
+        console.log("Auth check failed:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    getAndSetUser()
-  },[])
+    };
+    getAndSetUser();
+  }, []);
 
   return {
     user,
+    setUser,
     loading,
     handleLogin,
     handleRegister,
     handleLogout,
+    handleOtpLogin
   };
 };
