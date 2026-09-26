@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate ,Link } from 'react-router'
-import { useLocation } from "react-router";
-import { useAuth } from '../hooks/useAuth'
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, Link, useLocation } from "react-router";
+import { useAuth } from "../hooks/useAuth";
 import { sendOtp, verifyOtp } from "../services/auth.api";
 import "../auth.form.scss";
 
@@ -22,6 +21,7 @@ const Login = () => {
   const [canResend, setCanResend] = useState(false);
 
   const inputRefs = useRef([]);
+  const isSubmittingRef = useRef(false);
 
   // ── Resend Countdown Timer ───────────────────────────────────────────
   useEffect(() => {
@@ -46,26 +46,24 @@ const Login = () => {
       setCanResend(false);
     } catch (err) {
       setError(
-        err.response?.data?.message || "Failed to send verification code.",
+        err.response?.data?.message || "Failed to send verification code."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  const isSubmittingRef = useRef(false);
-
   // ── Handle 6-Digit OTP Inputs ────────────────────────────────────────
   const handleOtpChange = (index, value) => {
     setError("");
-    const cleaned = value.replace(/\D/g, ""); // Keep only digits
+    const cleaned = value.replace(/\D/g, "");
     if (!cleaned && value !== "") return;
 
     const newOtp = [...otp];
     newOtp[index] = cleaned ? cleaned.slice(-1) : "";
     setOtp(newOtp);
 
-    // Auto-focus next input if a digit was entered
+    // Auto-focus next input
     if (cleaned && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -73,17 +71,18 @@ const Login = () => {
 
   const handleKeyDown = (index, e) => {
     setError("");
-    if (e.key === "Backspace") {
-      if (!otp[index] && index > 0) {
-        inputRefs.current[index - 1]?.focus();
-      }
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
     }
   };
 
   const handlePaste = (e) => {
     setError("");
     e.preventDefault();
-    const pasteData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasteData = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
     if (pasteData.length > 0) {
       const newOtp = ["", "", "", "", "", ""];
       pasteData.split("").forEach((ch, idx) => {
@@ -95,10 +94,12 @@ const Login = () => {
     }
   };
 
-  const executeVerify = async (codeToVerify) => {
+  // ── Step 2: Verify OTP ──────────────────────────────────────────────
+  const handleVerifyOtp = async (e) => {
+    e?.preventDefault();
     if (isSubmittingRef.current) return;
 
-    const code = codeToVerify || otp.join("");
+    const code = otp.join("");
     if (code.length !== 6) {
       setError("Please enter the complete 6-digit code.");
       return;
@@ -122,153 +123,158 @@ const Login = () => {
     }
   };
 
-  // ── Step 2: Verify OTP ──────────────────────────────────────────────
-  const handleVerifyOtp = async (e) => {
-    e?.preventDefault();
-    await executeVerify();
-  };
-
   return (
     <main className="auth-page">
       <div className="auth-card">
+        {/* ── Brand ── */}
         <div className="auth-card__brand">
           <span className="auth-card__brand-dot" />
           SKILLBRIDGE AI
         </div>
 
+        {/* ── Header ── */}
         <div className="auth-card__header">
           <h1 className="auth-card__title">
-            {step === "email" ? "Sign In with Email" : "Check your inbox"}
+            {step === "email" ? "Sign In" : "Check Your Inbox"}
           </h1>
           <p className="auth-card__subtitle">
             {step === "email"
-              ? "Enter your email to receive a 6-digit verification code"
-              : `We sent a code to ${email}`}
+              ? "Enter your email address to receive a secure login code"
+              : `We sent a 6-digit verification code to ${email}`}
           </p>
         </div>
 
+        {/* ── Success message ── */}
         {successMsg && !error && (
-          <div style={{ background: '#064e3b', color: '#6ee7b7', padding: '12px 16px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px', border: '1px solid #059669', textAlign: 'center' }}>
-            {successMsg}
+          <div className="auth-success">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            <span>{successMsg}</span>
           </div>
         )}
 
-        {error && <div className="auth-error">{error}</div>}
+        {/* ── Error message ── */}
+        {error && (
+          <div className="auth-error">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span>{error}</span>
+          </div>
+        )}
 
         {step === "email" ? (
           <form onSubmit={handleSendOtp} className="auth-form">
             <div className="auth-field">
-              <label className="auth-label">Email address</label>
+              <label className="auth-field__label" htmlFor="login-email">Email Address</label>
               <input
+                id="login-email"
                 type="email"
-                className="auth-input"
+                className="auth-field__input"
                 placeholder="name@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoFocus
+                autoComplete="email"
               />
             </div>
-            <button type="submit" className="auth-button" disabled={loading}>
-              {loading ? "Sending code..." : "Continue with Email"}
+            <button type="submit" className="auth-btn" disabled={loading}>
+              {loading ? (
+                <>
+                  <div className="auth-spinner auth-spinner--small" />
+                  <span>Sending Code...</span>
+                </>
+              ) : (
+                <>
+                  <span>Continue with Email</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
+                </>
+              )}
             </button>
           </form>
         ) : (
           <form onSubmit={handleVerifyOtp} className="auth-form">
-            <div
-              className="otp-inputs-container"
-              style={{
-                display: "flex",
-                gap: "8px",
-                justifyContent: "center",
-                margin: "16px 0",
-              }}
-            >
-              {otp.map((digit, idx) => (
-                <input
-                  key={idx}
-                  ref={(el) => (inputRefs.current[idx] = el)}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(idx, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(idx, e)}
-                  onPaste={handlePaste}
-                  style={{
-                    width: "44px",
-                    height: "52px",
-                    fontSize: "22px",
-                    fontWeight: "600",
-                    textAlign: "center",
-                    background: "#0f172a",
-                    border: "1px solid #334155",
-                    borderRadius: "8px",
-                    color: "#ffffff",
+            <div className="auth-otp-container">
+              <div className="auth-otp-boxes">
+                {otp.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    ref={(el) => (inputRefs.current[idx] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    className={`auth-otp-box ${digit ? "auth-otp-box--filled" : ""}`}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(idx, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(idx, e)}
+                    onPaste={handlePaste}
+                    autoFocus={idx === 0}
+                  />
+                ))}
+              </div>
+
+              <div className="auth-otp-toolbar">
+                {canResend ? (
+                  <button
+                    type="button"
+                    className="auth-text-btn"
+                    onClick={handleSendOtp}
+                  >
+                    Resend Code
+                  </button>
+                ) : (
+                  <span>Resend in {timer}s</span>
+                )}
+                <span className="auth-otp-toolbar__dot">•</span>
+                <button
+                  type="button"
+                  className="auth-text-btn auth-text-btn--muted"
+                  onClick={() => {
+                    setStep("email");
+                    setOtp(["", "", "", "", "", ""]);
+                    setError("");
                   }}
-                  autoFocus={idx === 0}
-                />
-              ))}
+                >
+                  Change Email
+                </button>
+              </div>
             </div>
 
             <button
               type="submit"
-              className="auth-button"
+              className="auth-btn"
               disabled={loading || otp.join("").length !== 6}
             >
-              {loading ? "Verifying..." : "Verify & Sign In"}
-            </button>
-
-            <div
-              style={{
-                marginTop: "16px",
-                textAlign: "center",
-                fontSize: "14px",
-                color: "#94a3b8",
-              }}
-            >
-              {canResend ? (
-                <button
-                  type="button"
-                  onClick={handleSendOtp}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#38bdf8",
-                    cursor: "pointer",
-                    fontWeight: "500",
-                  }}
-                >
-                  Resend code
-                </button>
+              {loading ? (
+                <>
+                  <div className="auth-spinner auth-spinner--small" />
+                  <span>Verifying...</span>
+                </>
               ) : (
-                <span>Resend code in {timer}s</span>
+                <>
+                  <span>Verify & Sign In</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </>
               )}
-              <span style={{ margin: "0 8px" }}>•</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setStep("email");
-                  setOtp(["", "", "", "", "", ""]);
-                  setError("");
-                }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#64748b",
-                  cursor: "pointer",
-                }}
-              >
-                Change email
-              </button>
-            </div>
+            </button>
           </form>
         )}
-        <div className="auth-card__footer">
-          <p>
-            Don't have an account? <Link to="/register">Create one</Link>
-          </p>
-        </div>
+
+        {/* ── Footer ── */}
+        <p className="auth-card__footer">
+          Don't have an account?{" "}
+          <Link className="auth-card__link" to="/register">Create one</Link>
+        </p>
       </div>
     </main>
   );
