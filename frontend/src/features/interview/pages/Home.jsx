@@ -35,7 +35,7 @@ const Home = () => {
                 {/* ── Page Header ── */}
                 <header className="home__header">
                     <h1 className="home__title">Create your custom interview plan</h1>
-                    <p className="home__subtitle">CARBON TALENT PRECISION ENGINE</p>
+                    <p className="home__subtitle">SkillBridge AI PRECISION ENGINE</p>
                 </header>
 
                 {/* ── Two-column form grid ── */}
@@ -60,7 +60,7 @@ const Home = () => {
                                 name="jobDescription"
                                 className="home__textarea"
                                 placeholder="Paste the target job description here. Include key requirements, responsibilities, and company values for the best analysis..."
-                                defaultValue={jobDescription}
+                                value={jobDescription}
                                 onChange={(e) => setJobDescription(e.target.value)}
                             />
                         </div>
@@ -118,7 +118,7 @@ const Home = () => {
                                     name="selfDescription"
                                     className="home__textarea"
                                     placeholder="Tell us about your background, career goals, or specific projects you want the report to highlight..."
-                                    defaultValue={selfDescription}
+                                    value={selfDescription}
                                     onChange={(e) => setSelfDescription(e.target.value)}
                                 />
                             </div>

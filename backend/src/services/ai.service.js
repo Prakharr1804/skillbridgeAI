@@ -132,23 +132,34 @@ ${jobDescription}
 }
 
 async function generatePdfFromHtml(html) {
-  const browser = await puppeteer.connect({
-    browserWSEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_TOKEN}`,
-  });
-  
-  const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: 'networkidle0' });
-  const pdfBuffer = await page.pdf({
-    format: 'A4',
-    margin: {
-      top: '20mm',
-      bottom: '20mm',
-      left: '15mm',
-      right: '15mm'
+  let browser;
+  try {
+    browser = await puppeteer.connect({
+      browserWSEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_API_TOKEN}`,
+    });
+    
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    
+    // Brief settle time for rendering styles/fonts
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      margin: {
+        top: '20mm',
+        bottom: '20mm',
+        left: '15mm',
+        right: '15mm'
+      },
+      printBackground: true
+    });
+    return pdfBuffer;
+  } finally {
+    if (browser) {
+      await browser.close().catch(() => {});
     }
-  });
-  await browser.close();
-  return pdfBuffer;
+  }
 }
 
 async function generateResumePdf({resume, selfDescription, jobDescription}){

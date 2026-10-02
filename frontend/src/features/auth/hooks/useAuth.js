@@ -1,6 +1,6 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../auth.context";
-import { login, logout, register, getMe, sendOtp, verifyOtp } from "../services/auth.api";
+import { login, logout, register, sendOtp, verifyOtp } from "../services/auth.api";
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -10,8 +10,8 @@ export const useAuth = () => {
     try {
       setLoading(true);
       const data = await login({ email, password });
-      
       setUser(data.user);
+      return data;
     } catch (err) {
       throw err;
     } finally {
@@ -34,9 +34,10 @@ export const useAuth = () => {
   const handleLogout = async () => {
     try {
       setLoading(true);
-      const data = await logout();
+      await logout();
       setUser(null);
     } catch (error) {
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -54,22 +55,6 @@ export const useAuth = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    const getAndSetUser = async () => {
-      try {
-        const data = await getMe();
-        if (data?.user) {
-          setUser(data.user);
-        }
-      } catch (err) {
-        console.log("Auth check failed:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getAndSetUser();
-  }, []);
 
   return {
     user,

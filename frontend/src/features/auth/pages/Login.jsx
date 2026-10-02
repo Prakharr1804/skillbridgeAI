@@ -1,125 +1,40 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
-import { sendOtp, verifyOtp } from "../services/auth.api";
 import "../auth.form.scss";
 
 const Login = () => {
   const location = useLocation();
   const initialEmail = location.state?.registeredEmail || "";
   const successMsg = location.state?.successMessage || "";
-  const { setUser } = useAuth();
+
+  const { handleLogin } = useAuth();
   const navigate = useNavigate();
 
-  // Steps: 'email' (Step 1) | 'otp' (Step 2)
-  const [step, setStep] = useState("email");
   const [email, setEmail] = useState(initialEmail);
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [timer, setTimer] = useState(60);
-  const [canResend, setCanResend] = useState(false);
 
-  const inputRefs = useRef([]);
-  const isSubmittingRef = useRef(false);
-
-  // ── Resend Countdown Timer ───────────────────────────────────────────
-  useEffect(() => {
-    let interval = null;
-    if (step === "otp" && timer > 0) {
-      interval = setInterval(() => setTimer((t) => t - 1), 1000);
-    } else if (timer === 0) {
-      setCanResend(true);
-    }
-    return () => clearInterval(interval);
-  }, [step, timer]);
-
-  // ── Step 1: Send OTP ────────────────────────────────────────────────
-  const handleSendOtp = async (e) => {
-    e?.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
-      await sendOtp({ email });
-      setStep("otp");
-      setTimer(60);
-      setCanResend(false);
+      await handleLogin({ email, password });
+      navigate("/");
     } catch (err) {
+      console.error("Login error:", err);
+      const backendMessage = err.response?.data?.message;
       setError(
-        err.response?.data?.message || "Failed to send verification code."
+        backendMessage ||
+          err.message ||
+          "Invalid email or password. Please try again."
       );
     } finally {
       setLoading(false);
-    }
-  };
-
-  // ── Handle 6-Digit OTP Inputs ────────────────────────────────────────
-  const handleOtpChange = (index, value) => {
-    setError("");
-    const cleaned = value.replace(/\D/g, "");
-    if (!cleaned && value !== "") return;
-
-    const newOtp = [...otp];
-    newOtp[index] = cleaned ? cleaned.slice(-1) : "";
-    setOtp(newOtp);
-
-    // Auto-focus next input
-    if (cleaned && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    setError("");
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e) => {
-    setError("");
-    e.preventDefault();
-    const pasteData = e.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-    if (pasteData.length > 0) {
-      const newOtp = ["", "", "", "", "", ""];
-      pasteData.split("").forEach((ch, idx) => {
-        if (idx < 6) newOtp[idx] = ch;
-      });
-      setOtp(newOtp);
-      const nextIndex = Math.min(pasteData.length, 5);
-      inputRefs.current[nextIndex]?.focus();
-    }
-  };
-
-  // ── Step 2: Verify OTP ──────────────────────────────────────────────
-  const handleVerifyOtp = async (e) => {
-    e?.preventDefault();
-    if (isSubmittingRef.current) return;
-
-    const code = otp.join("");
-    if (code.length !== 6) {
-      setError("Please enter the complete 6-digit code.");
-      return;
-    }
-
-    isSubmittingRef.current = true;
-    setError("");
-    setLoading(true);
-
-    try {
-      const data = await verifyOtp({ email, otp: code });
-      setUser(data.user);
-      navigate("/");
-    } catch (err) {
-      console.error("OTP verification error:", err);
-      const backendMessage = err.response?.data?.message;
-      setError(backendMessage || err.message || "Invalid or expired code. Please try again.");
-    } finally {
-      setLoading(false);
-      isSubmittingRef.current = false;
     }
   };
 
@@ -134,20 +49,25 @@ const Login = () => {
 
         {/* ── Header ── */}
         <div className="auth-card__header">
-          <h1 className="auth-card__title">
-            {step === "email" ? "Sign In" : "Check Your Inbox"}
-          </h1>
+          <h1 className="auth-card__title">Welcome Back</h1>
           <p className="auth-card__subtitle">
-            {step === "email"
-              ? "Enter your email address to receive a secure login code"
-              : `We sent a 6-digit verification code to ${email}`}
+            Enter your credentials to access your interview workspace
           </p>
         </div>
 
-        {/* ── Success message ── */}
+        {/* ── Success message (e.g. from registration redirect) ── */}
         {successMsg && !error && (
           <div className="auth-success">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
               <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
@@ -158,7 +78,16 @@ const Login = () => {
         {/* ── Error message ── */}
         {error && (
           <div className="auth-error">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -167,113 +96,91 @@ const Login = () => {
           </div>
         )}
 
-        {step === "email" ? (
-          <form onSubmit={handleSendOtp} className="auth-form">
-            <div className="auth-field">
-              <label className="auth-field__label" htmlFor="login-email">Email Address</label>
-              <input
-                id="login-email"
-                type="email"
-                className="auth-field__input"
-                placeholder="name@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoFocus
-                autoComplete="email"
-              />
-            </div>
-            <button type="submit" className="auth-btn" disabled={loading}>
-              {loading ? (
-                <>
-                  <div className="auth-spinner auth-spinner--small" />
-                  <span>Sending Code...</span>
-                </>
-              ) : (
-                <>
-                  <span>Continue with Email</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                    <polyline points="12 5 19 12 12 19" />
-                  </svg>
-                </>
-              )}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyOtp} className="auth-form">
-            <div className="auth-otp-container">
-              <div className="auth-otp-boxes">
-                {otp.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    ref={(el) => (inputRefs.current[idx] = el)}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    className={`auth-otp-box ${digit ? "auth-otp-box--filled" : ""}`}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(idx, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(idx, e)}
-                    onPaste={handlePaste}
-                    autoFocus={idx === 0}
-                  />
-                ))}
-              </div>
+        {/* ── Email & Password Form ── */}
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="auth-field">
+            <label className="auth-field__label" htmlFor="login-email">
+              Email Address
+            </label>
+            <input
+              id="login-email"
+              type="email"
+              className="auth-field__input"
+              placeholder="name@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus={!initialEmail}
+              autoComplete="email"
+            />
+          </div>
 
-              <div className="auth-otp-toolbar">
-                {canResend ? (
-                  <button
-                    type="button"
-                    className="auth-text-btn"
-                    onClick={handleSendOtp}
-                  >
-                    Resend Code
-                  </button>
-                ) : (
-                  <span>Resend in {timer}s</span>
-                )}
-                <span className="auth-otp-toolbar__dot">•</span>
-                <button
-                  type="button"
-                  className="auth-text-btn auth-text-btn--muted"
-                  onClick={() => {
-                    setStep("email");
-                    setOtp(["", "", "", "", "", ""]);
-                    setError("");
-                  }}
-                >
-                  Change Email
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="auth-btn"
-              disabled={loading || otp.join("").length !== 6}
+          <div className="auth-field">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              {loading ? (
-                <>
-                  <div className="auth-spinner auth-spinner--small" />
-                  <span>Verifying...</span>
-                </>
-              ) : (
-                <>
-                  <span>Verify & Sign In</span>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </>
-              )}
-            </button>
-          </form>
-        )}
+              <label className="auth-field__label" htmlFor="login-password">
+                Password
+              </label>
+              <button
+                type="button"
+                className="auth-text-btn auth-text-btn--muted"
+                style={{ fontSize: "0.72rem", padding: "0 2px" }}
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+            <input
+              id="login-password"
+              type={showPassword ? "text" : "password"}
+              className="auth-field__input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoFocus={Boolean(initialEmail)}
+              autoComplete="current-password"
+            />
+          </div>
+
+          <button type="submit" className="auth-btn" disabled={loading}>
+            {loading ? (
+              <>
+                <div className="auth-spinner auth-spinner--small" />
+                <span>Signing In...</span>
+              </>
+            ) : (
+              <>
+                <span>Sign In</span>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </>
+            )}
+          </button>
+        </form>
 
         {/* ── Footer ── */}
         <p className="auth-card__footer">
           Don't have an account?{" "}
-          <Link className="auth-card__link" to="/register">Create one</Link>
+          <Link className="auth-card__link" to="/register">
+            Create one
+          </Link>
         </p>
       </div>
     </main>

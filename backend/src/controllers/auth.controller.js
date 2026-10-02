@@ -235,7 +235,8 @@ async function loginUserController(req, res){
             return res.status(400).json({message: "All fields are required"})
         }
 
-        const user = await userModel.findOne({email})
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await userModel.findOne({ email: normalizedEmail });
 
         if(!user){
             return res.status(400).json({message: "Invalid user or password"})
@@ -251,7 +252,7 @@ async function loginUserController(req, res){
             id: user._id, username: user.username
         }, process.env.JWT_SECRET, {
             expiresIn: "7d"
-        })
+        });
 
         res.cookie('token', token, cookieOptions)
 
@@ -262,10 +263,10 @@ async function loginUserController(req, res){
                 username: user.username,
                 email: user.email
             }
-        })
+        });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({message: "Internal server error"})
+        console.error("loginUserController error:", error);
+        return res.status(500).json({message: "Internal server error"});
     }
 }
 
@@ -284,7 +285,7 @@ async function logoutUserController(req, res){
                 token
             })
         }
-        res.clearCookie('token')
+        res.clearCookie('token', cookieOptions)
         return res.status(200).json({message: "User logged out successfully"})
     } catch (error) {
         console.error(error);
