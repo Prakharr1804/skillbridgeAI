@@ -1,6 +1,15 @@
 const { GoogleGenAI, Type } = require('@google/genai');
 
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_GENAI_API_KEY });
+const geminiApiKey = (
+    process.env.GOOGLE_GENAI_API_KEY ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    ''
+).trim();
+
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+
+const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 
 // ── Gemini response schema ────────────────────────────────────────────────────
 const evaluationSchema = {
@@ -105,7 +114,7 @@ STAR ANALYSIS: For this technical question, set all STAR fields to false.`}
 Return a JSON evaluation following the exact schema provided.`;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: GEMINI_MODEL,
         contents: prompt,
         config: {
             responseMimeType: 'application/json',

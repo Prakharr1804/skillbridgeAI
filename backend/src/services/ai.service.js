@@ -2,8 +2,17 @@ const { GoogleGenAI, Type } = require("@google/genai");
 const { z } = require("zod");
 const puppeteer = require("puppeteer-core");
 
+const geminiApiKey = (
+    process.env.GOOGLE_GENAI_API_KEY ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    ''
+).trim();
+
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+
 const ai = new GoogleGenAI({
-    apiKey: process.env.GOOGLE_GENAI_API_KEY
+    apiKey: geminiApiKey
 });
 
 // Zod schema for validating the AI response
@@ -119,7 +128,7 @@ ${jobDescription}
 `;
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: GEMINI_MODEL,
         contents: prompt,
         config: {
             responseMimeType: "application/json",
@@ -201,7 +210,7 @@ The resume should not be so lengthy, it should ideally be 1-2 pages long when co
     }
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: GEMINI_MODEL,
         contents: prompt,
         config: {
             responseMimeType: "application/json",

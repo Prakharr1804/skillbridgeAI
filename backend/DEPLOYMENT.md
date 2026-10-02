@@ -247,8 +247,14 @@ Create a `.env.example` file in the `backend/` directory for reference.
 | `MONGO_URI` | MongoDB Atlas Connection String | `mongodb+srv://user:pass@cluster.mongodb.net/skillbridge?retryWrites=true&w=majority` |
 | `JWT_SECRET` | Strong secret key for signing auth tokens | 64+ char random string (e.g., `openssl rand -hex 32`) |
 | `GOOGLE_GENAI_API_KEY` | Google Gemini API Key | `AIzaSy...` |
+| `GEMINI_MODEL` | (Optional) Model name (defaults to `gemini-3.8-flash`) | `gemini-3.8-flash` |
 | `FRONTEND_URL` | Production Frontend domain | `https://skillbridge.vercel.app` |
-| `PUPPETEER_SKIP_CHROMIUM_DOWNLOAD` | (Optional Docker/Alpine flag) | `false` |
+| `BROWSERLESS_API_TOKEN` | Browserless.io API Token for cloud PDF resumes | `your_token_from_browserless_io` |
+| `EMAIL_HOST` | SMTP server host for OTP delivery | `smtp.gmail.com` |
+| `EMAIL_PORT` | SMTP port | `587` |
+| `EMAIL_USER` | Sending email account | `your-email@gmail.com` |
+| `EMAIL_PASS` | App password (e.g., Google App Password) | `abcd efgh ijkl mnop` |
+| `EMAIL_FROM` | Sender display name & address | `"SkillBridge AI <no-reply@skillbridge.ai>"` |
 
 ---
 
@@ -273,18 +279,25 @@ Create a `.env.example` file in the `backend/` directory for reference.
 2. Log into [Render.com](https://render.com) and click **New +** -> **Web Service**.
 3. Connect your repository.
 4. Set the configuration:
+   - **Name**: `skillbridge-backend`
    - **Root Directory**: `backend`
    - **Environment**: `Node`
-   - **Build Command**: `npm install && npx puppeteer browsers install chrome`
+   - **Build Command**: `npm install`
    - **Start Command**: `npm start`
-   - **Plan**: Starter or higher (Puppeteer PDF rendering requires at least 512MB - 1GB RAM).
+   - **Plan**: **Free** (Since PDF rendering is offloaded to Browserless API, the free 512MB RAM plan works smoothly).
 5. Add **Environment Variables** in the Render Dashboard:
    - `NODE_ENV` = `production`
-   - `MONGO_URI` = `<Your MongoDB URI>`
-   - `JWT_SECRET` = `<Your Secret>`
+   - `MONGO_URI` = `mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/skillbridge?retryWrites=true&w=majority`
+   - `JWT_SECRET` = `<Your Secure Random String>`
    - `GOOGLE_GENAI_API_KEY` = `<Your Gemini API Key>`
-   - `FRONTEND_URL` = `<Your Frontend URL>`
-6. Click **Deploy Web Service**.
+   - `FRONTEND_URL` = `https://your-frontend-app.vercel.app`
+   - `BROWSERLESS_API_TOKEN` = `<Your Browserless.io API Token>`
+   - `EMAIL_HOST` = `smtp.gmail.com`
+   - `EMAIL_PORT` = `587`
+   - `EMAIL_USER` = `your-email@gmail.com`
+   - `EMAIL_PASS` = `your-16-char-gmail-app-password`
+   - `EMAIL_FROM` = `"SkillBridge AI <no-reply@skillbridge.ai>"`
+6. Click **Deploy Web Service**. Render will automatically build and assign you a URL like `https://skillbridge-backend.onrender.com`.
 
 ---
 
