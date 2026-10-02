@@ -1,35 +1,45 @@
 const { GoogleGenAI, Type } = require('@google/genai');
 
-const geminiApiKey = (
+const rawKey = (
     process.env.GOOGLE_GENAI_API_KEY ||
     process.env.GEMINI_API_KEY ||
     process.env.GOOGLE_API_KEY ||
     ''
-).trim();
+).trim().replace(/^['"]|['"]$/g, '');
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
+const geminiApiKey = rawKey.replace(/^AQ\./, '');
+
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
 const ai = new GoogleGenAI({ apiKey: geminiApiKey });
 
-async function generateContentWithFallback(params) {
+async function generateContentWithFallback(params, maxRetries = 3) {
     const modelsToTry = [
         params.model || GEMINI_MODEL,
-        'gemini-2.5-flash-lite',
-        'gemini-2.0-flash',
-        'gemini-1.5-flash',
+        'gemini-2.5-flash',
         'gemini-3.8-flash'
     ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
 
     let lastError;
     for (const model of modelsToTry) {
-        try {
-            return await ai.models.generateContent({
-                ...params,
-                model
-            });
-        } catch (err) {
-            console.warn(`[Gemini API] Mock interview model ${model} failed (${err?.status || err?.message}). Attempting fallback...`);
-            lastError = err;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                return await ai.models.generateContent({
+                    ...params,
+                    model
+                });
+            } catch (err) {
+                lastError = err;
+                const isRetryable = err?.status === 503 || err?.status === 429 || err?.message?.includes('high demand') || err?.message?.includes('RESOURCE_EXHAUSTED');
+                if (isRetryable && attempt < maxRetries) {
+                    const delayMs = attempt * 1500;
+                    console.warn(`[Gemini API] Mock interview model ${model} returned ${err?.status || '503'} (high demand). Retrying attempt ${attempt + 1}/${maxRetries} in ${delayMs}ms...`);
+                    await new Promise(r => setTimeout(r, delayMs));
+                } else {
+                    console.warn(`[Gemini API] Mock interview model ${model} failed (${err?.status || err?.message}). Trying next candidate...`);
+                    break;
+                }
+            }
         }
     }
     throw lastError;
