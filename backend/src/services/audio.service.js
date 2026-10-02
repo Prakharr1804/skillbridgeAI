@@ -8,9 +8,33 @@ const geminiApiKey = (
     ''
 ).trim();
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
 
 const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+
+async function generateContentWithFallback(params) {
+    const modelsToTry = [
+        params.model || GEMINI_MODEL,
+        'gemini-2.5-flash-lite',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-3.8-flash'
+    ].filter((m, idx, arr) => m && arr.indexOf(m) === idx);
+
+    let lastError;
+    for (const model of modelsToTry) {
+        try {
+            return await ai.models.generateContent({
+                ...params,
+                model
+            });
+        } catch (err) {
+            console.warn(`[Gemini API] Audio model ${model} failed (${err?.status || err?.message}). Attempting fallback...`);
+            lastError = err;
+        }
+    }
+    throw lastError;
+}
 
 // ── Gemini schema for transcription response ──────────────────────────────────
 const transcriptionSchema = {
@@ -41,7 +65,7 @@ async function transcribeAudio(audioInput, mimeType) {
 
     const base64Audio = buffer.toString('base64');
 
-    const response = await ai.models.generateContent({
+    const response = await generateContentWithFallback({
         model: GEMINI_MODEL,
         contents: [
             {
